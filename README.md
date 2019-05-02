@@ -13,6 +13,6 @@ just copy IndicatorButton.swift file to your project and set your buttons class 
 
 # Usage
 
-    testButton.isLoading ? testButton.stopLoading(withShake: shakeOnCancelSwitch.isOn) : testButton.startLoading()
+    testButton.isLoading ? testButton.stopLoading() : testButton.startLoading()
   
 You can download the example project to see how it works.
