@@ -46,7 +46,7 @@ class IndicatorButton: UIButton {
         }
     }
     
-    func startLoading() {
+    func startLoading(center:CGPoint? = nil) {
         if !isCancelabel {
             isEnabled = false
         }
@@ -59,6 +59,7 @@ class IndicatorButton: UIButton {
             }
         }
         isLoading = true
+        originFrame = bounds
         indicator.startAnimating()
         DispatchQueue.main.async {
             self.titleLabel!.alpha = 0
@@ -68,7 +69,11 @@ class IndicatorButton: UIButton {
             self.indicator.layer.position.x = CGPoint.zero.x + self.bounds.width / 2
             self.frame.size.width = self.frame.height
             self.indicator.layer.position.x = self.bounds.width / 2
-            self.layer.position.x = (UIScreen.main.bounds.width / 2) 
+            if center != nil {
+                self.layer.position.x = center!.x
+            } else {
+                self.layer.position.x = UIScreen.main.bounds.width / 2
+            }
             self.layoutIfNeeded()
             self.titleLabel?.alpha = 0
         }) { (finished) in
@@ -78,12 +83,16 @@ class IndicatorButton: UIButton {
         }
     }
     
-    func stopLoading(withShake:Bool = false) {
+    func stopLoading(withShake:Bool = false, center:CGPoint? = nil) {
         isEnabled = false
         indicator.stopAnimating()
         UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: damping, initialSpringVelocity: 0, options: .curveEaseInOut, animations: {
             self.frame.size.width = self.originFrame.width
-            self.layer.position.x = self.originPosition.x
+            if center != nil {
+                self.layer.position.x = center!.x
+            } else {
+                self.layer.position.x = self.originPosition.x
+            }
             self.layoutIfNeeded()
         }) { (finished) in
             UIView.animate(withDuration: 0.3, animations: {
@@ -122,26 +131,5 @@ class IndicatorButton: UIButton {
             self.backgroundColor = self.originBackgroundColor
             self.layoutIfNeeded()
         }
-    }
-}
-
-
-extension UIView {
-    
-    func shakeVerticall() {
-        let transformAnim  = CAKeyframeAnimation(keyPath:"transform")
-        transformAnim.values  = [NSValue(caTransform3D: CATransform3DMakeRotation(0.08, 0.0, 0.0, 1.2)),NSValue(caTransform3D: CATransform3DMakeRotation(-0.08 , 0, 0, 1.2))]
-        transformAnim.autoreverses = true
-        transformAnim.duration  = 0.1
-        transformAnim.repeatCount = 0
-        layer.add(transformAnim, forKey: "transform")
-    }
-    
-    func shakeHorizontal() {
-        let animation = CAKeyframeAnimation(keyPath: "transform.translation.x")
-        animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
-        animation.duration = 0.6 
-        animation.values = [0.8,-0.8, 15, -15, 20, -20, 15, -15, 8, -8]
-        self.layer.add(animation, forKey: "shake")
     }
 }
