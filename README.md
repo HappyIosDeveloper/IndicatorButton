@@ -1,6 +1,6 @@
 # IndicatorButton
 A pure swift subclass of UIButton which can be turn to an activity indicator.
-
+New feature, now it can show progress (in digits)!
 
 ![alt text](https://github.com/UzumakiAlfredo/IndicatorButton/blob/master/preview.gif?raw=true)
 
