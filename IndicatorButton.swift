@@ -13,11 +13,14 @@ class IndicatorButton: UIButton {
     var isLoading = false
     var isCancelabel = false
     var damping:CGFloat = 0.7
+    private var originalTitle = ""
     private var originFrame = CGRect()
     private var originPosition = CGPoint()
     private var originBackgroundColor = UIColor()
     private var indicator = UIActivityIndicatorView()
-    
+    private var latestShowedProgress = 0
+    private var latestOrderedProgress = 0
+
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
@@ -46,6 +49,54 @@ class IndicatorButton: UIButton {
         }
     }
     
+    func setProgress(value:Int) {
+        saveOriginalTitle()
+        hideIndicator()
+        latestOrderedProgress = value
+        if latestOrderedProgress > latestShowedProgress {
+            latestShowedProgress += 1
+            increaseProgress()
+        } else if latestOrderedProgress == 100 {
+            hideIndicator()
+        } else {
+             setTitle(latestShowedProgress.description + "%", for: .normal)
+        }
+    }
+    
+    func increaseProgress() {
+        latestShowedProgress += 1
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            if self.latestShowedProgress < 100 && self.latestShowedProgress < self.latestOrderedProgress {
+                self.setTitle(self.latestShowedProgress.description + "%", for: .normal)
+                self.increaseProgress()
+            } else {
+                self.showIndicator()
+            }
+        }
+    }
+    
+    func hideIndicator() {
+        indicator.isHidden = true
+        titleLabel?.alpha = 1
+        if latestOrderedProgress == 100 {
+            setTitle(originalTitle, for: .normal)
+        }
+    }
+    
+    func showIndicator() {
+        indicator.isHidden = false
+        indicator.startAnimating()
+        titleLabel?.alpha = 0
+    }
+    
+    func saveOriginalTitle() {
+        if let title = titleLabel?.text {
+            if !title.contains("%") {
+                originalTitle = title
+            }
+        }
+    }
+    
     func startLoading(center:CGPoint? = nil) {
         if !isCancelabel {
             isEnabled = false
@@ -65,7 +116,7 @@ class IndicatorButton: UIButton {
             self.titleLabel!.alpha = 0
             self.layoutIfNeeded()
         }
-        UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: damping, initialSpringVelocity: 0, options: .curveEaseInOut, animations: {
+        UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: damping, initialSpringVelocity: 0, options: .curveEaseInOut, animations: { [unowned self] in
             self.indicator.layer.position.x = CGPoint.zero.x + self.bounds.width / 2
             self.frame.size.width = self.frame.height
             self.indicator.layer.position.x = self.bounds.width / 2
@@ -76,9 +127,9 @@ class IndicatorButton: UIButton {
             }
             self.layoutIfNeeded()
             self.titleLabel?.alpha = 0
-        }) { (finished) in
+        }) { [weak self] (finished) in
             UIView.animate(withDuration: 0.2, animations: {
-                self.titleLabel?.alpha = 0
+                self?.titleLabel?.alpha = 0
             })
         }
     }
@@ -86,7 +137,7 @@ class IndicatorButton: UIButton {
     func stopLoading(withShake:Bool = false, center:CGPoint? = nil) {
         isEnabled = false
         indicator.stopAnimating()
-        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: damping, initialSpringVelocity: 0, options: .curveEaseInOut, animations: {
+        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: damping, initialSpringVelocity: 0, options: .curveEaseInOut, animations: { [unowned self] in
             self.frame.size.width = self.originFrame.width
             if center != nil {
                 self.layer.position.x = center!.x
@@ -95,23 +146,23 @@ class IndicatorButton: UIButton {
             }
             self.layoutIfNeeded()
         }) { (finished) in
-            UIView.animate(withDuration: 0.3, animations: {
-                self.titleLabel?.alpha = 1
-                self.layoutIfNeeded()
+            UIView.animate(withDuration: 0.3, animations: { [weak self] in
+                self?.titleLabel?.alpha = 1
+                self?.layoutIfNeeded()
                 if withShake {
                     UIView.animate(withDuration: 0.3, animations: {
-                        self.backgroundColor = .red
+                        self?.backgroundColor = .red
                     }, completion: { (finished) in
                         UIView.animate(withDuration: 0.3, animations: {
-                            self.backgroundColor = self.originBackgroundColor
-                            self.isEnabled = true
-                            self.isLoading = false
-                            self.shakeHorizontal()
+                            self?.backgroundColor = self?.originBackgroundColor
+                            self?.isEnabled = true
+                            self?.isLoading = false
+                            self?.shakeHorizontal()
                         })
                     })
                 } else {
-                    self.isEnabled = true
-                    self.isLoading = false
+                    self?.isEnabled = true
+                    self?.isLoading = false
                 }
             })
         }
@@ -119,28 +170,17 @@ class IndicatorButton: UIButton {
     
     func setDisable(color: UIColor = .lightGray) {
         isEnabled = false
-        UIView.animate(withDuration: 0.3) {
-            self.backgroundColor = color
-            self.layoutIfNeeded()
+        UIView.animate(withDuration: 0.3) { [weak self] in
+            self?.backgroundColor = color
+            self?.layoutIfNeeded()
         }
     }
     
     func setEnable() {
         isEnabled = true
-        UIView.animate(withDuration: 0.3) {
-            self.backgroundColor = self.originBackgroundColor
-            self.layoutIfNeeded()
+        UIView.animate(withDuration: 0.3) { [weak self] in
+            self?.backgroundColor = self?.originBackgroundColor
+            self?.layoutIfNeeded()
         }
-    }
-}
-
-extension UIView {
-    
-    func shakeHorizontal() {
-        let animation = CAKeyframeAnimation(keyPath: "transform.translation.x")
-        animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
-        animation.duration = 0.6
-        animation.values = [0.8,-0.8, 15, -15, 20, -20, 15, -15, 8, -8]
-        self.layer.add(animation, forKey: "shake")
     }
 }
