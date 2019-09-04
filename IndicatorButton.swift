@@ -24,6 +24,20 @@ class IndicatorButton: UIButton {
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
+        
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        UIView.animate(withDuration: 0.4) {
+            self.layer.transform = CATransform3DScale(CATransform3DIdentity, 0.95, 0.95, 1.2)
+        }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        UIView.animate(withDuration: 0.4) {
+            self.layer.transform = CATransform3DScale(CATransform3DIdentity, 1, 1, 1)
+        }
+    }
     
     override func awakeFromNib() {
         super.awakeFromNib()
