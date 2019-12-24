@@ -197,4 +197,12 @@ class IndicatorButton: UIButton {
             self?.layoutIfNeeded()
         }
     }
+    
+    func shakeHorizontal() {
+        let animation = CAKeyframeAnimation(keyPath: "transform.translation.x")
+        animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+        animation.duration = 0.6
+        animation.values = [0.8,-0.8, 15, -15, 20, -20, 15, -15, 8, -8]
+        self.layer.add(animation, forKey: "shake")
+    }
 }
