@@ -111,40 +111,44 @@ class IndicatorButton: UIButton {
         }
     }
     
-    func startLoading(center:CGPoint? = nil) {
-        if !isCancelabel {
-            isEnabled = false
-        }
-        if isLoading {
-            if isCancelabel {
-                stopLoading()
-                return
-            } else {
-                return
-            }
-        }
-        isLoading = true
-        originFrame = bounds
-        indicator.startAnimating()
+  func startLoading(center:CGPoint? = nil) {
         DispatchQueue.main.async {
-            self.titleLabel!.alpha = 0
-            self.layoutIfNeeded()
-        }
-        UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: damping, initialSpringVelocity: 0, options: .curveEaseInOut, animations: { [unowned self] in
-            self.indicator.layer.position.x = CGPoint.zero.x + self.bounds.width / 2
-            self.frame.size.width = self.frame.height
-            self.indicator.layer.position.x = self.bounds.width / 2
-            if center != nil {
-                self.layer.position.x = center!.x
-            } else {
-                self.layer.position.x = UIScreen.main.bounds.width / 2
+            if !self.isCancelabel {
+                self.isEnabled = false
             }
-            self.layoutIfNeeded()
-            self.titleLabel?.alpha = 0
-        }) { [weak self] (finished) in
-            UIView.animate(withDuration: 0.2, animations: {
-                self?.titleLabel?.alpha = 0
-            })
+            if self.isLoading {
+                if self.isCancelabel {
+                    self.stopLoading()
+                    return
+                } else {
+                    return
+                }
+            }
+            self.isLoading = true
+            self.originFrame = self.bounds
+            self.indicator.startAnimating()
+            DispatchQueue.main.async {
+                self.titleLabel!.alpha = 0
+                self.layoutIfNeeded()
+            }
+            UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: self.damping, initialSpringVelocity: 0, options: [.curveEaseInOut, .beginFromCurrentState], animations: { [unowned self] in
+                self.indicator.layer.position.x = self.bounds.width / 2
+                self.frame.size.width = self.bounds.height // make it circle
+                self.indicator.layer.position.x = self.bounds.width / 2
+                if center != nil {
+                    self.layer.position.x = center!.x
+                } else {
+                    self.layer.position.x = UIScreen.main.bounds.width / 2
+                }
+                self.translatesAutoresizingMaskIntoConstraints = true
+                self.layoutIfNeeded()
+                print("indicatorButton.frame.size.width: \(self.frame.size.width)")
+                self.titleLabel?.alpha = 0
+            }) { [weak self] (finished) in
+                UIView.animate(withDuration: 0.2, animations: {
+                    self?.titleLabel?.alpha = 0
+                })
+            }
         }
     }
     
