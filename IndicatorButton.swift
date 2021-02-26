@@ -59,6 +59,7 @@ class IndicatorButton: UIButton {
             indicator.isUserInteractionEnabled = false
             indicator.hidesWhenStopped = true
             indicator.style = .white
+            indicator.color = .white
             addSubview(indicator)
             DispatchQueue.main.async {
                 self.indicator.frame = CGRect(origin: CGPoint.zero, size: CGSize(width: 45, height: self.frame.height))
