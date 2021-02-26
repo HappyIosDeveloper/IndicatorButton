@@ -50,7 +50,7 @@ class IndicatorButton: UIButton {
             originBackgroundColor = color
         }
         setupIndicator()
-        titleLabel!.font = UIFont(name: Strings.get.fontNameBold, size: Sizes.get.largeFontSize)
+       // titleLabel!.font = UIFont(name: Strings.get.fontNameBold, size: Sizes.get.largeFontSize)
     }
     
     private func setupIndicator() {
